@@ -53,6 +53,12 @@ func listEntries(entries [][]string) {
 	fmt.Fprintln(w, "ID\t", entries[0][0], "\t", entries[0][1])
 
 	for i := 1; i < len(entries); i++ {
+		if entries[i][0] == "" || entries[i][1] == "" {
+			w.Flush()
+			fmt.Println("'tasks.csv' seems to be missing data. (id:", i, ")")
+			os.Exit(1)
+		}
+
 		fmt.Fprintln(w, i, "\t", entries[i][0], "\t", entries[i][1])
 	}
 
