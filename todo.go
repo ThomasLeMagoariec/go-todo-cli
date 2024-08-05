@@ -35,6 +35,13 @@ func main() {
 			fmt.Println("wrong number of arguments passed")
 			os.Exit(1)
 		}
+	case "remove":
+		if len(args) >= 2 {
+			removeTask(entries, args[1])
+		} else {
+			fmt.Println("wrong number of arguments passed")
+			os.Exit(1)
+		}
 	default:
 		fmt.Printf("unknown command: %s\n", args[0])
 	}
@@ -94,9 +101,8 @@ func mergeIntoOne(strs []string) string {
 	return message
 }
 
+// * ex: ./todo add My New Task
 func addTask(name []string) {
-	fmt.Println("add task:", name)
-
 	f, err := os.OpenFile("tasks.csv", os.O_APPEND|os.O_WRONLY, os.ModeAppend)
 
 	if err != nil {
@@ -117,6 +123,8 @@ func addTask(name []string) {
 	fmt.Println("Task Added!")
 }
 
+// * ex: ./todo update 5 name New Name
+// * ex: ./todo update 4 status done!
 func updateTask(entries [][]string, id string, field string, value string) {
 	int_id, err := strconv.Atoi(id)
 
@@ -141,7 +149,7 @@ func updateTask(entries [][]string, id string, field string, value string) {
 	}
 	defer f.Close()
 
-	for i, _ := range entries {
+	for i := range entries {
 		if int_id == i {
 			if field == "status" {
 				entries[i][1] = value
@@ -165,6 +173,44 @@ func updateTask(entries [][]string, id string, field string, value string) {
 	fmt.Println("Updated Task!")
 }
 
+// * ex: ./todo remove 1
+func removeTask(entries [][]string, id string) {
+	int_id, err := strconv.Atoi(id)
+
+	if err != nil {
+		log.Fatal(err)
+		os.Exit(1)
+	}
+
+	if int_id == 0 || int_id > len(entries) {
+		fmt.Println("invalid task ID")
+		os.Exit(1)
+	}
+
+	f, err := os.OpenFile("tasks.csv", os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer f.Close()
+
+	newEntries := make([][]string, 0)
+	for i := range entries {
+		if int_id != i {
+			newEntries = append(newEntries, entries[i])
+		}
+	}
+
+	w := csv.NewWriter(f)
+	w.WriteAll(newEntries)
+
+	if err := w.Error(); err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println("Removed Task!")
+}
+
+// * ex: ./todo help
 func displayHelpMessage() {
 	fmt.Println("TODO APP")
 
@@ -175,6 +221,7 @@ func displayHelpMessage() {
 	fmt.Fprintln(w, "list\tlists tasks")
 	fmt.Fprintln(w, "add\tadd a new task, specify name")
 	fmt.Fprintln(w, "update\tupdate info about a task provide task id, field and value")
+	fmt.Fprintln(w, "remove\tremoves a task based on id")
 
 	w.Flush()
 }
