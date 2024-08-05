@@ -9,4 +9,4 @@ Figuring out how to integrate file handling with the CSV package was quite chall
 
 ## What I would change
 
-If i were to rewrite this or update it, I would put all the function that handle the CSV file in a seperate module. I would also change my way of updating and removing entries as rewriting the entire file is over the top and unecessary.
+If i were to rewrite this or update it, I would put all the function that handle the CSV file in a seperate module to improve code readability. I would also change my way of updating and removing entries as rewriting the entire file is over the top and unecessary.
