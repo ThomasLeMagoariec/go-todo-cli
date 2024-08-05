@@ -1,6 +1,6 @@
 # TODO cli app
 
-Une simple application todo pour le terminal, le but de ce projet était d'apprendre le Go sans tutoriel, juste en explorant et en testant.
+Une simple application todo pour le terminal, le but de ce projet était d'apprendre le Go sans tutoriel, juste en explorant et en testant. En somme j'ai appris les bases de Go, ça pourrait être mon nouveau Python.
 
 ## Les défis que j'ai rencontrés
 
