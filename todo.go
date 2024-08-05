@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strconv"
 	"text/tabwriter"
 )
 
@@ -20,8 +21,15 @@ func main() {
 	switch args[0] {
 	case "list":
 		listEntries(entries)
+	case "add":
+		addTask(args[1:])
 	case "help":
 		displayHelpMessage()
+	case "test":
+		res := mergeIntoOne(args)
+		fmt.Println(res)
+	case "status":
+		updateTaskStatus(entries, args[1])
 	default:
 		fmt.Printf("unknown command: %s\n", args[0])
 	}
@@ -53,6 +61,8 @@ func listEntries(entries [][]string) {
 	fmt.Fprintln(w, "ID\t", entries[0][0], "\t", entries[0][1])
 
 	for i := 1; i < len(entries); i++ {
+
+		//! check for ghost entries
 		if entries[i][0] == "" || entries[i][1] == "" {
 			w.Flush()
 			fmt.Println("'tasks.csv' seems to be missing data. (id:", i, ")")
@@ -63,6 +73,63 @@ func listEntries(entries [][]string) {
 	}
 
 	w.Flush()
+}
+
+// ! technically useless if you surround the name in "
+func mergeIntoOne(strs []string) string {
+	var message string
+	for i, str := range strs {
+		if i == len(strs)-1 {
+			message += str
+		} else {
+			message += str + " "
+		}
+	}
+
+	return message
+}
+
+func addTask(name []string) {
+	fmt.Println("add task:", name)
+
+	f, err := os.OpenFile("tasks.csv", os.O_APPEND|os.O_WRONLY, os.ModeAppend)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer f.Close()
+
+	var data [][]string
+	data = append(data, []string{mergeIntoOne(name), "incomplete"})
+
+	w := csv.NewWriter(f)
+	w.WriteAll(data)
+
+	if err := w.Error(); err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println("Task Added!")
+}
+
+func updateTaskStatus(entries [][]string, id string) {
+	int_id, err := strconv.Atoi(id)
+
+	if err != nil {
+		log.Fatal(err)
+		os.Exit(1)
+	}
+
+	if int_id == 0 || int_id > len(entries) {
+		fmt.Println("invalid task ID")
+		os.Exit(1)
+	}
+
+	// for i, entry := range entries {
+	// 	if id == i {
+
+	// 	}
+	// }
 }
 
 func displayHelpMessage() {
