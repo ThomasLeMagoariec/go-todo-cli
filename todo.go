@@ -29,7 +29,12 @@ func main() {
 		res := mergeIntoOne(args)
 		fmt.Println(res)
 	case "status":
-		updateTaskStatus(entries, args[1])
+		if len(args) >= 4 {
+			updateTaskStatus(entries, args[1], args[2], mergeIntoOne(args[3:]))
+		} else {
+			fmt.Println("wrong number of arguments passed")
+			os.Exit(1)
+		}
 	default:
 		fmt.Printf("unknown command: %s\n", args[0])
 	}
@@ -112,7 +117,7 @@ func addTask(name []string) {
 	fmt.Println("Task Added!")
 }
 
-func updateTaskStatus(entries [][]string, id string) {
+func updateTaskStatus(entries [][]string, id string, field string, value string) {
 	int_id, err := strconv.Atoi(id)
 
 	if err != nil {
@@ -125,11 +130,39 @@ func updateTaskStatus(entries [][]string, id string) {
 		os.Exit(1)
 	}
 
-	// for i, entry := range entries {
-	// 	if id == i {
+	if !(field == "status" || field == "name") {
+		fmt.Println("invalid field '", field, "'. Use 'status' or 'name'")
+		os.Exit(1)
+	}
 
-	// 	}
-	// }
+	f, err := os.OpenFile("tasks.csv", os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer f.Close()
+
+	for i, entry := range entries {
+		if int_id == i {
+			fmt.Println("found task |", entry)
+			if field == "status" {
+				entries[i][1] = value
+			} else {
+				entries[i][0] = value
+			}
+			break
+		}
+	}
+
+	f.Truncate(0)
+	f.Seek(0, 0)
+
+	w := csv.NewWriter(f)
+	w.WriteAll(entries)
+
+	if err := w.Error(); err != nil {
+		log.Fatal(err)
+	}
+
 }
 
 func displayHelpMessage() {
