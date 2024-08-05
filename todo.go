@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"text/tabwriter"
 )
 
 func main() {
@@ -14,10 +15,11 @@ func main() {
 	}
 
 	args := os.Args[1:]
+	entries := loadEntries("./tasks.csv")
 
 	switch args[0] {
 	case "list":
-		fmt.Println("list!")
+		listEntries(entries)
 	case "help":
 		displayHelpMessage()
 	default:
@@ -42,6 +44,19 @@ func loadEntries(filePath string) [][]string {
 	}
 
 	return records
+}
+
+func listEntries(entries [][]string) {
+
+	w := tabwriter.NewWriter(os.Stdout, 5, 4, 1, ' ', tabwriter.DiscardEmptyColumns)
+
+	fmt.Fprintln(w, "ID\t", entries[0][0], "\t", entries[0][1])
+
+	for i := 1; i < len(entries); i++ {
+		fmt.Fprintln(w, i, "\t", entries[i][0], "\t", entries[i][1])
+	}
+
+	w.Flush()
 }
 
 func displayHelpMessage() {
