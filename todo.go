@@ -28,9 +28,9 @@ func main() {
 	case "test":
 		res := mergeIntoOne(args)
 		fmt.Println(res)
-	case "status":
+	case "update":
 		if len(args) >= 4 {
-			updateTaskStatus(entries, args[1], args[2], mergeIntoOne(args[3:]))
+			updateTask(entries, args[1], args[2], mergeIntoOne(args[3:]))
 		} else {
 			fmt.Println("wrong number of arguments passed")
 			os.Exit(1)
@@ -64,7 +64,7 @@ func listEntries(entries [][]string) {
 	w := tabwriter.NewWriter(os.Stdout, 5, 4, 1, ' ', tabwriter.DiscardEmptyColumns)
 
 	fmt.Fprintln(w, "ID\t", entries[0][0], "\t", entries[0][1])
-
+	fmt.Fprintln(w)
 	for i := 1; i < len(entries); i++ {
 
 		//! check for ghost entries
@@ -117,7 +117,7 @@ func addTask(name []string) {
 	fmt.Println("Task Added!")
 }
 
-func updateTaskStatus(entries [][]string, id string, field string, value string) {
+func updateTask(entries [][]string, id string, field string, value string) {
 	int_id, err := strconv.Atoi(id)
 
 	if err != nil {
@@ -141,9 +141,8 @@ func updateTaskStatus(entries [][]string, id string, field string, value string)
 	}
 	defer f.Close()
 
-	for i, entry := range entries {
+	for i, _ := range entries {
 		if int_id == i {
-			fmt.Println("found task |", entry)
 			if field == "status" {
 				entries[i][1] = value
 			} else {
@@ -163,14 +162,19 @@ func updateTaskStatus(entries [][]string, id string, field string, value string)
 		log.Fatal(err)
 	}
 
+	fmt.Println("Updated Task!")
 }
 
 func displayHelpMessage() {
 	fmt.Println("TODO APP")
-	fmt.Println("\nAvailable commands:")
-	fmt.Println("\thelp\tdisplays this message")
-	fmt.Println("\tlist\tdisplays tasks")
 
-	//? this messes up alignment
-	//? fmt.Println("\tdosomething\tsmth")
+	w := tabwriter.NewWriter(os.Stdout, 5, 4, 5, ' ', tabwriter.DiscardEmptyColumns)
+	fmt.Fprintln(w, "\nARGUMENT\tDESCRIPTION")
+
+	fmt.Fprintln(w, "\nhelp\tdisplays this message")
+	fmt.Fprintln(w, "list\tlists tasks")
+	fmt.Fprintln(w, "add\tadd a new task, specify name")
+	fmt.Fprintln(w, "update\tupdate info about a task provide task id, field and value")
+
+	w.Flush()
 }
